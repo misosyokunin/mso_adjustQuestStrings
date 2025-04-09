@@ -1,0 +1,49 @@
+* {
+	font-size: 16px;
+	color: light-dark(#181a1b, #c8c3bc);
+	background-color: light-dark(#fff, #c8c3bc);
+}
+@media (prefers-color-scheme: dark) {
+	*{
+		background-color: #181a1b;
+		color: #c8c3bc;
+	}
+	a{
+		color: #69a6d5;
+	}
+}
+body{
+	font-family: Open Sans,sans-serif;
+}
+
+.inputArea,
+.outputArea{
+	display: flex;
+	flex-direction: column;
+	margin: 10px;
+}
+:is(.inputArea, .outputArea) > textarea{
+	min-height: 10em;
+}
+button{
+	cursor: pointer;
+}
+h2{
+	display: flex;
+	justify-content: space-between;
+}
+
+a[href^=http]:after{
+	content: "↗";
+	display: inline-block;
+}
+label {
+	display: flex;
+	justify-content: space-between;
+}
+label > span {
+	width: 8em;
+}
+label > input {
+	width: 100%;
+}
