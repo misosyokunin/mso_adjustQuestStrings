@@ -9,5 +9,5 @@ MSOのクエストの文言を整えるツールです。
 > - 当コンテンツについてMSO様に問い合わせを絶対にしないでください。
 > - 当コンテンツはMSO様ならびにプレイヤー様にご迷惑を掛けないよう努めておりますが、万一何かありましたら公開を取りやめいたします。
 
-閲覧は[こちら]([https://misosyokunin.github.io/mso_hayaimonogatiEventData/main.htm](https://misosyokunin.github.io/mso_adjustQuestStrings/main.htm))
+閲覧は[こちら](https://misosyokunin.github.io/mso_adjustQuestStrings/main.htm)
 
