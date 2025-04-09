@@ -40,7 +40,7 @@ function makeArticle(param){
 		button.type = "button";
 		button.textContent = "クリア🆑";
 		button.addEventListener("click", () => {
-			event.currentTarget.closest("article").querySelectorAll("textarea").forEach(ele => ele.value = "");
+			article.querySelectorAll(":is(textarea, input)").forEach(ele => ele.value = "");
 			
 			changeDelayText(button, "クリアしました！😊");
 		});
@@ -72,7 +72,7 @@ function makeArticle(param){
 				if(param["modifyFunction"]){
 					ov = param["modifyFunction"](ov);
 				}
-				event.currentTarget.closest("article").querySelector(".outputArea > textarea").value = ov;
+				article.querySelector(".outputArea > textarea").value = ov;
 				
 				if(event.isTrusted){
 					changeDelayText(button, "変換しました！😊");
@@ -95,7 +95,6 @@ function makeArticle(param){
 			button.type = "button";
 			button.textContent = "📝コピーする📝";
 			button.addEventListener("click", () => {
-				const textarea = event.currentTarget.closest("div").querySelector(":scope > textarea");
 				textarea.select();
 				document.execCommand("copy");
 				window.getSelection?.().removeAllRanges();
@@ -142,9 +141,8 @@ makeArticle({
 	"articleTitle": "ウィキのミッションインポッシブルのページ用に整形",
 	"headers": (() => {
 		const fragment = document.createDocumentFragment();
-		const p = document.createElement("p");
-		fragment.append(p);
 		{
+			const p = document.createElement("p");
  			const anc = document.createElement("a");
 			anc.href = "https://w.atwiki.jp/minesweeper-online/pages/120.html#id_1137305e";
 			anc.textContent = "ミッション：インポッシブル - マインスイーパーオンライン　アットウィキ";
@@ -152,6 +150,19 @@ makeArticle({
 			anc.setAttribute("rel", "noopener noreferrer");
 			p.append(anc);
 			p.append(document.createTextNode("の形式へ整形します。"));
+			fragment.append(p);
+ 		}
+		{
+			const p = document.createElement("p");
+ 			p.append(document.createTextNode("匿名でご提供くださる場合は"));
+ 			const anc = document.createElement("a");
+			anc.href = "https://minesweeper.online/ja/player/16842796";
+			anc.textContent = "魚頭男";
+			anc.setAttribute("target", "_blank");
+			anc.setAttribute("rel", "noopener noreferrer");
+			p.append(anc);
+			p.append(document.createTextNode("までご連絡おねがいします。"));
+			fragment.append(p);
 		}
 		return fragment;
 	})(),
@@ -166,7 +177,19 @@ makeArticle({
 			const input = document.createElement("input");
 			input.type = "text";
 			input.value = "魚頭男";
-			input.classList.add("player_string");
+			input.classList.add("playername_string");
+			label.append(input);
+		}
+		{
+			const label = document.createElement("label");
+			fieldset.append(label);
+			const span = document.createElement("span");
+			span.textContent = "プレイヤーリンク";
+			label.append(span);
+			const input = document.createElement("input");
+			input.type = "text";
+			input.value = "https://minesweeper.online/ja/player/16842796";
+			input.classList.add("playerlink_string");
 			label.append(input);
 		}
 		{
@@ -184,20 +207,45 @@ makeArticle({
 		return fieldset;
 	})(),
 	"modifyFunction": function(texts){
-		const ra = getKinds(texts);
 		
 		const field = event.currentTarget.closest(".inputArea");
+		const playerlink = field.querySelector(".playerlink_string").value;
+		const season = field.querySelector(".season_string").value;
+		const playername = field.querySelector(".playername_string").value;
+		const reg = new RegExp("^https://minesweeper.online/ja/player/\\d+$");
+		{
+			const errors = [];
+			if(!playername){
+				errors.push("お名前が入力されていません。");
+			}
+			if(!season){
+				errors.push("シーズンが入力されていません。");
+			}
+			if(!playerlink.match(reg)){
+				errors.push("プレイヤーリンクが正しくありません。");
+			}
+			if(errors.length){
+				alert(errors.map((error) => `🔴${error}`).join("\n"));
+				null.poo();	/*エラー*/
+			}
+		}
+		
+		const kinds = getKinds(texts);
 		const newTexts = texts.map((text, index) => {
 			let ta = [];
 			ta[0] = text[0].replace("L", "");
 			ta[1] = text[1];
-			ta[2] = field.querySelector(".season_string").value;
+			ta[2] = season;
 			ta[3] = "";	/*コメント*/
-			ta[4] = field.querySelector(".player_string").value;
-			ta = ta.concat(ra[index]);
+			ta[4] = playername;
+			ta = ta.concat(kinds[index]);
 			return ta;
 		});
-		return newTexts.map((text) => `|${text.join("|")}|`).join("\n");
+		const ra = [];
+		ra.push(`-${playername}（[[>>${playerlink}]]）`);
+		ra.push("");
+		ra.push(newTexts.map((text) => `|${text.join("|")}|`).join("\n"));
+		return ra.join("\n");
 	},
 });
 
