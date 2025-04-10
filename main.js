@@ -1,9 +1,28 @@
 
+{
+	const p = document.createElement("p");
+	p.textContent = "最終更新：";
+	document.querySelector("body > footer").append(p);
+	const span = document.createElement("span");
+	span.textContent = document.lastModified;
+	p.append(span);
+}
 
 const SAMPLE_TEXT = `
-L14	28 名誉ポイントを稼ぐ	0 / 28	+8456⭐
-+20.3⚡
-L11	レベル 中級 のゲームを 18回クリアする	0 / 18	+664🟡
+L10E	レベル 中級 のゲームを 8 回連続でクリアする	0 / 8	+18120⭐
++43.5⚡
+L12	レベル 中級 のゲームを 20回クリアする	0 / 20	+725🟡
++17.4⚡
+L12	レベル ハード NG のゲームをフラグなしで 5 回クリアする	0 / 5	+3.62🔴️
++17.4⚡
+L10	イベントポイントを25個集める (イースターエッグ)	0 / 25	+3020⭐
++1.51🔴️
++14.5⚡
+L11	レベル 上級 のゲームを 3回クリアする	0 / 3	+332🟡
++1.66🔴️
++16.0⚡
+L11	レベル エビル NG のゲームを 5回クリアする	0 / 5	+3322⭐
++332🟡
 +16.0⚡
 `;
 
@@ -122,17 +141,42 @@ makeArticle({
 makeArticle({
 	"articleID": "abstractChanger",
 	"articleTitle": "クエスト文言要約",
-	"headers": (() => {
-		const fragment = document.createDocumentFragment();
-		const p = document.createElement("p");
-		p.textContent = "現段階で友好イベントで出るクエストにしか対応させていないです。";
-		fragment.append(p);
-		return fragment;
-	})(),
+	"headers": null,
 	"fieldsets": null,
 	"modifyFunction": function(texts){
 		texts = abstractDetail(texts);
 		return texts.map((text) => text.join("\t")).join("\n");
+	},
+});
+
+makeArticle({
+	"articleID": "changerAddQuestKind",
+	"articleTitle": "クエストの分類をつける",
+	"headers": null,
+	"fieldsets": null,
+	"modifyFunction": function(texts){
+		const kinds = getKinds(texts);
+		const ra = texts.map((text, index) => {
+			return text.concat(kinds[index]).join("\t");
+		});
+		return ra.join("\n");
+	},
+});
+
+makeArticle({
+	"articleID": "changerEliteLevel",
+	"articleTitle": "エリートを実質レベルへ換算する",
+	"headers": null,
+	"fieldsets": null,
+	"modifyFunction": function(texts){
+		const ra = texts.map((text, index) => {
+			const mat = text[0].match(/\d+(?=E)/);
+			if(mat){
+				text[0] = text[0].replace(mat[0], Number(mat[0]) * 3).slice(0, -1);
+			}
+			return text.join("\t");
+		});
+		return ra.join("\n");
 	},
 });
 
@@ -251,7 +295,7 @@ makeArticle({
 
 function splitQuests_bass(text){
 	const texts = text.split("\n").filter((str) => str.match(/L\d/)).map((str) => {
-		const ta = str.split("\t");
+		const ta = str.split(/(?<=^\d+E?)\s|\t/);
 		const ra = [];
 		ra[0] = ta[0];
 		ra[1] = ta[1];
@@ -282,6 +326,19 @@ function getKinds(texts){
 			}),
 		},
 		{
+			"trigger": "アリーナチケット",
+			"func": ((text) => {
+				return ["アリーナ", "アリーナチケット", "＊",];
+			}),
+		},
+		{
+			"trigger": "アリーナ",
+			"func": ((text) => {
+				const mode = text.match(/(?<=L\d\s?).*?(?=\s?の?アリーナ)/)[0];
+				return ["アリーナ", `${mode}アリーナ`, "＊",];
+			}),
+		},
+		{
 			"trigger": "コイン",
 			"func": ((text) => {
 				return ["資源", "コイン", "＊",];
@@ -293,76 +350,83 @@ function getKinds(texts){
 				return ["資源", "イベントポイント", "＊",];
 			}),
 		},
+		{
+			"trigger": "アクアマリン|オニキス|ルビー|トパーズ|サファイア|ダイヤモンド|エメラルド|アメジスト|ガーネット|翡翠",
+			"func": ((text) => {
+				const gem = text.match(/アクアマリン|オニキス|ルビー|トパーズ|サファイア|ダイヤモンド|エメラルド|アメジスト|ガーネット|翡翠/)[0];
+				return ["資源", "宝石", gem];
+			}),
+		},
 		
 		{
-			"trigger": "カスタム",
+			"trigger": "\\d+x\\d+/\\d+",
 			"func": ((text) => {
 				return ["カスタム", "＊", "＊",];
 			}),
 		},
-		{
-			"trigger": "のアリーナを",
-			"func": ((text) => {
-				const mode = text.match(/(?<=L\d\s).*?(?=\sのアリーナ)/)[0];
-				return ["アリーナ", `${mode}アリーナ`, "＊",];
-			}),
-		},
 
 		{
-			"trigger": "NG のゲームをフラグなし",
+			"trigger": "イージー|ミディアム|ハード|エビル.+ヒントなし",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sNG)/)[0];
+				const mode = text.match(/イージー|ミディアム|ハード|エビル/)[0];
+				return ["NG", mode, "ヒントなし",];
+			}),
+		},
+		{
+			"trigger": "イージー|ミディアム|ハード|エビル.+フラグなし",
+			"func": ((text) => {
+				const mode = text.match(/イージー|ミディアム|ハード|エビル/)[0];
 				return ["NG", mode, "フラグなし",];
 			}),
 		},
 		{
-			"trigger": "NG のゲームを \\d+回クリア",
+			"trigger": "イージー|ミディアム|ハード|エビル",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sNG)/)[0];
+				const mode = text.match(/イージー|ミディアム|ハード|エビル/)[0];
 				return ["NG", mode, "＊",];
 			}),
 		},
 		
 		{
-			"trigger": " のゲームを効率",
+			"trigger": "効率",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["効率", mode, "＊",];
 			}),
 		},
 		{
-			"trigger": " のゲームを \\d+ 秒以内",
+			"trigger": "秒以内",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["速度", mode, "＊",];
 			}),
 		},
 		{
-			"trigger": " のゲームを100回中",
+			"trigger": "100回中",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["習熟", mode, "＊",];
 			}),
 		},
 		{
-			"trigger": " のゲームをフラグなし",
+			"trigger": "フラグなし",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["フラグなし", mode, "＊",];
 			}),
 		},
 		
 		{
-			"trigger": " のゲームを \\d+\\s?回連続",
+			"trigger": "連続",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["連勝", mode, "＊",];
 			}),
 		},
 		{
-			"trigger": " のゲームを \\d+回クリア",
+			"trigger": "回",
 			"func": ((text) => {
-				const mode = text.match(/(?<=レベル\s).*?(?=\sのゲーム)/)[0];
+				const mode = text.match(/初級|中級|上級/)[0];
 				return ["回数", mode, "＊",];
 			}),
 		},
@@ -390,20 +454,20 @@ function abstractDetail(texts){
 		"のカスタムを",
 		"のゲームを",
 		"クリアする",
+		"集める",
+		"\\(.+\\)",
 		"を稼ぐ",
 		"以上",
 		"ゲームの報酬",
 		"を集める",
+		"を見つける",
+		"に",
+		"の",
+		"を",
 	];
 	const Delete_reg = new RegExp(DELETE_TEXTS.join("|"), "g");
 	const ra = texts.map((text) => {
 		text[1] = text[1].replace(Delete_reg, "");
-		const mat = text[1].match(/^\d+/);
-		if(mat){
-			const temp = mat[0];
-			text[1] = text[1].replace(mat[0], "");
-			text[1] += `${temp}個`;
-		}
 		return text;
 	});
 	return ra;
