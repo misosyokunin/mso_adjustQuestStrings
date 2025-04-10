@@ -65,7 +65,7 @@ function makeArticle(param){
 			button.addEventListener("click", () => {
 				const tv = textarea.value;
 				if(!tv){
-					alert("クエストデータが入力されていません。");
+					alert("⚠クエストデータが入力されていません。");
 					return;
 				}
 				let ov = splitQuests_bass(tv);
@@ -225,7 +225,7 @@ makeArticle({
 				errors.push("プレイヤーリンクが正しくありません。");
 			}
 			if(errors.length){
-				alert(errors.map((error) => `🔴${error}`).join("\n"));
+				alert(errors.map((error) => `⚠${error}`).join("\n"));
 				null.poo();	/*エラー*/
 			}
 		}
