@@ -1,9 +1,12 @@
-* {
-/*
-	font-size: 16px;
-*/
-	color: light-dark(#181a1b, #c8c3bc);
-	background-color: light-dark(#fff, #c8c3bc);
+*{
+	color: #333;
+	background-color: #FFF;
+}
+a{
+	color: #337ab7;
+}
+button{
+	background-color: #EFEFEF;
 }
 @media (prefers-color-scheme: dark) {
 	*{
@@ -13,9 +16,18 @@
 	a{
 		color: #69a6d5;
 	}
+	button{
+		background-color: #222;
+	}
 }
+
 body{
 	font-family: Open Sans,sans-serif;
+	max-width: 70ch;
+	margin: auto;
+	padding: 3em 1em;
+	font-size: 1.25em;
+	line-height: 1.75;
 }
 
 .inputArea,
@@ -29,6 +41,7 @@ body{
 }
 button{
 	cursor: pointer;
+	padding: 1.5ch;
 }
 h2{
 	display: flex;

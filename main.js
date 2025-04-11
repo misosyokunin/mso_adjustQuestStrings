@@ -27,10 +27,12 @@ L11	レベル エビル NG のゲームを 5回クリアする	0 / 5	+3322⭐
 `;
 
 function changeDelayText(tar, newtext, time = 2){
-	const defaultText = tar.textContent;
+	if(!tar.defaultText){
+		tar.defaultText = tar.textContent;
+	}
 	tar.textContent = newtext;
 	setTimeout(() => {
-		tar.textContent = defaultText;
+		tar.textContent = tar.defaultText;
 	}, time * 1000);
 }
 function makeArticle(param){
@@ -60,7 +62,6 @@ function makeArticle(param){
 		button.textContent = "クリア🆑";
 		button.addEventListener("click", () => {
 			article.querySelectorAll(":is(textarea, input)").forEach(ele => ele.value = "");
-			
 			changeDelayText(button, "クリアしました！😊");
 		});
 		h2.append(button);
@@ -198,14 +199,14 @@ makeArticle({
  		}
 		{
 			const p = document.createElement("p");
- 			p.append(document.createTextNode("匿名でご提供くださる場合は"));
+ 			p.append(document.createTextNode("（なお、匿名でご提供くださる場合は"));
  			const anc = document.createElement("a");
 			anc.href = "https://minesweeper.online/ja/player/16842796";
 			anc.textContent = "魚頭男";
 			anc.setAttribute("target", "_blank");
 			anc.setAttribute("rel", "noopener noreferrer");
 			p.append(anc);
-			p.append(document.createTextNode("までご連絡おねがいします。"));
+			p.append(document.createTextNode("までご連絡おねがいします。）"));
 			fragment.append(p);
 		}
 		return fragment;
@@ -294,7 +295,7 @@ makeArticle({
 });
 
 function splitQuests_bass(text){
-	const texts = text.split("\n").filter((str) => str.match(/L\d/)).map((str) => {
+	const texts = text.split("\n").filter((str) => str.match(/L\d+.*?(\s|\t).+/)).map((str) => {
 		const ta = str.split(/(?<=^\d+E?)\s|\t/);
 		const ra = [];
 		ra[0] = ta[0];
@@ -366,14 +367,14 @@ function getKinds(texts){
 		},
 
 		{
-			"trigger": "イージー|ミディアム|ハード|エビル.+ヒントなし",
+			"trigger": "(イージー|ミディアム|ハード|エビル).*?ヒントなし",
 			"func": ((text) => {
 				const mode = text.match(/イージー|ミディアム|ハード|エビル/)[0];
 				return ["NG", mode, "ヒントなし",];
 			}),
 		},
 		{
-			"trigger": "イージー|ミディアム|ハード|エビル.+フラグなし",
+			"trigger": "(イージー|ミディアム|ハード|エビル).*?フラグなし",
 			"func": ((text) => {
 				const mode = text.match(/イージー|ミディアム|ハード|エビル/)[0];
 				return ["NG", mode, "フラグなし",];
