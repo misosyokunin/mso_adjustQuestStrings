@@ -57,72 +57,84 @@ function makeArticle(param){
 		if(param["headers"]){
 			header.append(param["headers"]);
 		}
-		const button = document.createElement("button");
-		button.type = "button";
-		button.textContent = "クリア🆑";
-		button.addEventListener("click", () => {
-			article.querySelectorAll(":is(textarea, input)").forEach(ele => ele.value = "");
-			changeDelayText(button, "クリアしました！😊");
-		});
-		h2.append(button);
 	}
 	
 	
 	{
-		const wrapper = document.createElement("div");
-		wrapper.classList.add("inputArea");
-		article.append(wrapper);
+		const section = document.createElement("section");
+		section.classList.add("inputArea");
+		article.append(section);
 		{
 			if(param["fieldsets"]){
-				wrapper.append(param["fieldsets"]);
+				section.append(param["fieldsets"]);
 			}
 			const textarea = document.createElement("textarea");
 			textarea.value = SAMPLE_TEXT;
-			wrapper.append(textarea);
-			const button = document.createElement("button");
-			button.type = "button";
-			button.textContent = "⏬変換する⏬";
-			button.addEventListener("click", () => {
-				const tv = textarea.value;
-				if(!tv){
-					alert("⚠クエストデータが入力されていません。");
-					return;
-				}
-				let ov = splitQuests_bass(tv);
-				if(param["modifyFunction"]){
-					ov = param["modifyFunction"](ov);
-				}
-				article.querySelector(".outputArea > textarea").value = ov;
-				
-				if(event.isTrusted){
-					changeDelayText(button, "変換しました！😊");
-				}
-			});
-			wrapper.append(button);
-			setTimeout(() => {
-				button.click();
-			}, 1);
+			section.append(textarea);
+			const wrapper = document.createElement("div");
+			wrapper.classList.add("adjustButtons");
+			section.append(wrapper);
+			{
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = "⏬変換する⏬";
+				button.addEventListener("click", () => {
+					const tv = textarea.value;
+					if(!tv){
+						alert("⚠クエストデータが入力されていません。");
+						return;
+					}
+					let ov = splitQuests_bass(tv);
+					if(param["modifyFunction"]){
+						ov = param["modifyFunction"](ov);
+					}
+					article.querySelector(".outputArea > textarea").value = ov;
+					
+					if(event.isTrusted){
+						changeDelayText(button, "変換しました！😊");
+					}
+				});
+				wrapper.append(button);
+				setTimeout(() => {
+					button.click();
+				}, 1);
+			}
+			{
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = "クリア🆑";
+				button.addEventListener("click", () => {
+					article.querySelectorAll(":is(input, textarea)").forEach((ele) => ele.value = "");
+					changeDelayText(button, "クリアしました！😊");
+				});
+				wrapper.append(button);
+			}
 		}
 	}
 	{
-		const wrapper = document.createElement("div");
-		wrapper.classList.add("outputArea");
-		article.append(wrapper);
+		const section = document.createElement("section");
+		section.classList.add("outputArea");
+		article.append(section);
 		{
 			const textarea = document.createElement("textarea");
-			wrapper.append(textarea);
-			const button = document.createElement("button");
-			button.type = "button";
-			button.textContent = "📝コピーする📝";
-			button.addEventListener("click", () => {
-				textarea.select();
-				document.execCommand("copy");
-				window.getSelection?.().removeAllRanges();
-				textarea.blur();
-				
-				changeDelayText(button, "コピーしました！😊");
-			});
-			wrapper.append(button);
+			section.append(textarea);
+			const wrapper = document.createElement("div");
+			wrapper.classList.add("adjustButtons");
+			section.append(wrapper);
+			{
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = "📝コピーする📝";
+				button.addEventListener("click", () => {
+					textarea.select();
+					document.execCommand("copy");
+					window.getSelection?.().removeAllRanges();
+					textarea.blur();
+					
+					changeDelayText(button, "コピーしました！😊");
+				});
+				wrapper.append(button);
+			}
 		}
 	}
 	const hr = document.createElement("hr");
@@ -352,6 +364,12 @@ function getKinds(texts){
 			}),
 		},
 		{
+			"trigger": "PvP",
+			"func": ((text) => {
+				return ["PvP", "＊", "＊",];
+			}),
+		},
+		{
 			"trigger": "アクアマリン|オニキス|ルビー|トパーズ|サファイア|ダイヤモンド|エメラルド|アメジスト|ガーネット|翡翠",
 			"func": ((text) => {
 				const gem = text.match(/アクアマリン|オニキス|ルビー|トパーズ|サファイア|ダイヤモンド|エメラルド|アメジスト|ガーネット|翡翠/)[0];
@@ -453,7 +471,8 @@ function abstractDetail(texts){
 		"NG",
 		"で",
 		"のカスタムを",
-		"のゲームを",
+		"モード",
+		"ゲームを",
 		"クリアする",
 		"集める",
 		"\\(.+\\)",
@@ -473,4 +492,3 @@ function abstractDetail(texts){
 	});
 	return ra;
 }
-

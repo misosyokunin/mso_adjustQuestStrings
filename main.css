@@ -47,7 +47,16 @@ h2{
 	display: flex;
 	justify-content: space-between;
 }
-
+.adjustButtons {
+	display: flex;
+	justify-content: space-around;
+}
+.adjustButtons > button {
+	width: 100%;
+}
+.adjustButtons > button:nth-of-type(2) {
+	flex-shrink: 2;
+}
 a[href^=http]:after{
 	content: "↗";
 	display: inline-block;
